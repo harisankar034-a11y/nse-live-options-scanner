@@ -11,7 +11,11 @@ app = Flask(__name__)
 
 IST = ZoneInfo("Asia/Kolkata")
 
-# F&O stocks
+
+# =========================
+# F&O STOCKS
+# =========================
+
 FNO_SYMBOLS = [
     "RELIANCE", "HDFCBANK", "ICICIBANK", "SBIN", "AXISBANK",
     "KOTAKBANK", "INDUSINDBK", "BANKBARODA", "PNB", "CANBK",
@@ -26,17 +30,72 @@ FNO_SYMBOLS = [
     "COALINDIA"
 ]
 
-# Cash universe
-CASH_SYMBOLS = list(dict.fromkeys(FNO_SYMBOLS + [
-    "ABB", "ACC", "ADANIGREEN", "AMBUJACEM", "APOLLOHOSP",
-    "BEL", "BIOCON", "BOSCHLTD", "BRITANNIA", "CHOLAFIN",
-    "DABUR", "GAIL", "GODREJCP", "GRASIM", "HAVELLS",
-    "ICICIGI", "INDIGO", "IOC", "IRCTC", "JINDALSTEL",
-    "LICI", "LUPIN", "MARICO", "MAXHEALTH", "NAUKRI",
-    "PIDILITIND", "RECLTD", "SAIL", "SIEMENS", "SRF",
-    "TATACONSUM", "TATASTEEL", "TORNTPHARM", "ULTRACEMCO",
-    "VEDL", "YESBANK", "ZYDUSLIFE"
-]))
+
+# =========================
+# LARGE CAP
+# =========================
+
+LARGE_CAP = [
+    "RELIANCE", "HDFCBANK", "ICICIBANK", "BHARTIARTL",
+    "TCS", "INFY", "SBIN", "LICI", "HINDUNILVR",
+    "ITC", "BAJFINANCE", "LT", "MARUTI", "AXISBANK",
+    "KOTAKBANK", "SUNPHARMA", "M&M", "HCLTECH",
+    "TITAN", "ADANIENT", "ADANIPORTS", "NTPC",
+    "POWERGRID", "ONGC", "TATAMOTORS", "ULTRACEMCO",
+    "WIPRO", "NESTLEIND", "ASIANPAINT", "COALINDIA",
+    "BAJAJFINSV", "HINDZINC", "JSWSTEEL", "TATASTEEL",
+    "BEL", "ADANIGREEN", "HDFCLIFE", "SBILIFE"
+]
+
+
+# =========================
+# MID CAP
+# =========================
+
+MID_CAP = [
+    "ABB", "ACC", "AMBUJACEM", "APOLLOHOSP",
+    "BANKINDIA", "BIOCON", "BOSCHLTD", "BRITANNIA",
+    "CHOLAFIN", "CUMMINSIND", "DABUR", "DEEPAKNTR",
+    "DELHIVERY", "GAIL", "GODREJCP", "GRASIM",
+    "HAVELLS", "ICICIGI", "IDFCFIRSTB", "INDHOTEL",
+    "INDIGO", "IOC", "IRCTC", "JINDALSTEL",
+    "LICHSGFIN", "LUPIN", "MARICO", "MAXHEALTH",
+    "MUTHOOTFIN", "NAUKRI", "PAGEIND", "PIDILITIND",
+    "PERSISTENT", "PFC", "RECLTD", "SAIL",
+    "SIEMENS", "SRF", "TATACONSUM", "TORNTPHARM",
+    "TRENT", "TVSMOTOR", "UBL", "VEDL", "YESBANK",
+    "ZYDUSLIFE"
+]
+
+
+# =========================
+# SMALL CAP
+# =========================
+
+SMALL_CAP = [
+    "AARTIIND", "AFFLE", "ALKEM", "AMARAJABAT",
+    "ANANDRATHI", "ANGELONE", "ASTRAL", "BANDHANBNK",
+    "BATAINDIA", "BIRLACORPN", "BLS", "CANFINHOME",
+    "CDSL", "CENTRALBK", "CESC", "CROMPTON",
+    "CYIENT", "EDELWEISS", "EQUITASBNK", "EXIDEIND",
+    "FINEORG", "FORTIS", "GNFC", "GRAPHITE",
+    "GSPL", "HINDCOPPER", "IDBI", "IEX",
+    "IRB", "IRCON", "JBCHEPHARM", "JINDALSAW",
+    "KALYANKJIL", "KEI", "KFINTECH", "LAURUSLABS",
+    "MANAPPURAM", "MCX", "NATIONALUM", "NBCC",
+    "NLCINDIA", "OLECTRA", "PNCINFRA", "RITES",
+    "ROUTE", "RVNL", "SONACOMS", "SUZLON",
+    "TATACHEM", "TATATECH", "UCOBANK", "UNOMINDA"
+]
+
+
+# =========================
+# ALL CASH STOCKS
+# =========================
+
+CASH_SYMBOLS = list(dict.fromkeys(
+    LARGE_CAP + MID_CAP + SMALL_CAP
+))
 
 
 def nse_ticker(symbol):
@@ -54,6 +113,7 @@ def safe_float(value, digits=2):
 
 def calculate_rsi(close, period=14):
     delta = close.diff()
+
     gain = delta.clip(lower=0)
     loss = -delta.clip(upper=0)
 
@@ -61,9 +121,8 @@ def calculate_rsi(close, period=14):
     avg_loss = loss.rolling(period).mean()
 
     rs = avg_gain / avg_loss.replace(0, np.nan)
-    rsi = 100 - (100 / (1 + rs))
 
-    return rsi
+    return 100 - (100 / (1 + rs))
 
 
 def calculate_atr(df, period=14):
@@ -83,6 +142,7 @@ def calculate_atr(df, period=14):
 
 
 def flatten_columns(df):
+
     if isinstance(df.columns, pd.MultiIndex):
         df.columns = [
             str(col[-1] if isinstance(col, tuple) else col)
@@ -93,7 +153,9 @@ def flatten_columns(df):
 
 
 def scan_symbol(symbol):
+
     try:
+
         ticker = yf.Ticker(nse_ticker(symbol))
 
         df = ticker.history(
@@ -107,12 +169,20 @@ def scan_symbol(symbol):
 
         df = flatten_columns(df)
 
-        required = ["Open", "High", "Low", "Close", "Volume"]
+        required = [
+            "Open",
+            "High",
+            "Low",
+            "Close",
+            "Volume"
+        ]
 
         if not all(col in df.columns for col in required):
             return None
 
-        df = df.dropna(subset=required).copy()
+        df = df.dropna(
+            subset=required
+        ).copy()
 
         if len(df) < 30:
             return None
@@ -123,11 +193,20 @@ def scan_symbol(symbol):
         df["RSI"] = calculate_rsi(close)
         df["ATR"] = calculate_atr(df)
 
-        df["EMA20"] = close.ewm(span=20, adjust=False).mean()
-        df["EMA50"] = close.ewm(span=50, adjust=False).mean()
+        df["EMA20"] = close.ewm(
+            span=20,
+            adjust=False
+        ).mean()
+
+        df["EMA50"] = close.ewm(
+            span=50,
+            adjust=False
+        ).mean()
 
         typical_price = (
-            df["High"] + df["Low"] + df["Close"]
+            df["High"] +
+            df["Low"] +
+            df["Close"]
         ) / 3
 
         df["VWAP"] = (
@@ -148,44 +227,64 @@ def scan_symbol(symbol):
         if price is None:
             return None
 
-        previous_close = safe_float(df["Close"].iloc[-2])
+        previous_close = safe_float(
+            df["Close"].iloc[-2]
+        )
 
         if previous_close:
-            momentum = ((price - previous_close) / previous_close) * 100
+            momentum = (
+                (price - previous_close)
+                / previous_close
+            ) * 100
         else:
             momentum = 0
 
         momentum = safe_float(momentum)
 
-        current_volume = safe_float(last["Volume"], 0)
-        avg_volume = safe_float(last["AVG_VOL20"], 0)
+        current_volume = safe_float(
+            last["Volume"], 0
+        )
+
+        avg_volume = safe_float(
+            last["AVG_VOL20"], 0
+        )
 
         if avg_volume and avg_volume > 0:
-            volume_ratio = current_volume / avg_volume
+            volume_ratio = (
+                current_volume / avg_volume
+            )
         else:
             volume_ratio = 0
 
-        volume_ratio = safe_float(volume_ratio)
+        volume_ratio = safe_float(
+            volume_ratio
+        )
 
-        unusual_volume = volume_ratio >= 2.0
+        unusual_volume = (
+            volume_ratio >= 2.0
+        )
 
         buy_score = 0
         sell_score = 0
 
         # Momentum
         if momentum is not None:
+
             if momentum > 0.5:
                 buy_score += 25
+
             elif momentum > 0.2:
                 buy_score += 12
 
             if momentum < -0.5:
                 sell_score += 25
+
             elif momentum < -0.2:
                 sell_score += 12
 
         # VWAP
         if vwap:
+
             if price > vwap:
                 buy_score += 20
             else:
@@ -193,6 +292,7 @@ def scan_symbol(symbol):
 
         # EMA trend
         if ema20 and ema50:
+
             if ema20 > ema50:
                 buy_score += 20
             else:
@@ -200,35 +300,65 @@ def scan_symbol(symbol):
 
         # RSI
         if rsi is not None:
+
             if 50 <= rsi <= 70:
                 buy_score += 15
+
             elif 30 <= rsi < 50:
                 sell_score += 15
 
         # Volume
         if unusual_volume:
+
             if momentum and momentum > 0:
                 buy_score += 20
+
             elif momentum and momentum < 0:
                 sell_score += 20
 
+        # Signal
         if buy_score >= 70 and buy_score > sell_score:
+
             signal = "BUY"
             confidence = buy_score
+
             entry = price
-            sl = price - (1.5 * atr if atr else price * 0.01)
-            target = price + (3 * atr if atr else price * 0.02)
+
+            sl = price - (
+                1.5 * atr
+                if atr else price * 0.01
+            )
+
+            target = price + (
+                3 * atr
+                if atr else price * 0.02
+            )
 
         elif sell_score >= 70 and sell_score > buy_score:
+
             signal = "SELL"
             confidence = sell_score
+
             entry = price
-            sl = price + (1.5 * atr if atr else price * 0.01)
-            target = price - (3 * atr if atr else price * 0.02)
+
+            sl = price + (
+                1.5 * atr
+                if atr else price * 0.01
+            )
+
+            target = price - (
+                3 * atr
+                if atr else price * 0.02
+            )
 
         else:
+
             signal = "WAIT"
-            confidence = max(buy_score, sell_score)
+            confidence = max(
+                buy_score,
+                sell_score
+            )
+
             entry = price
             sl = None
             target = None
@@ -238,43 +368,96 @@ def scan_symbol(symbol):
         if timestamp.tzinfo is None:
             timestamp = timestamp.tz_localize("UTC")
 
-        entry_time = timestamp.astimezone(IST).strftime(
+        entry_time = timestamp.astimezone(
+            IST
+        ).strftime(
             "%d-%m-%Y %H:%M"
         )
 
         return {
+
             "symbol": symbol,
+
             "price": price,
+
             "momentum": momentum,
+
             "volume": current_volume,
+
             "avg_volume": avg_volume,
+
             "volume_ratio": volume_ratio,
+
             "unusual_volume": unusual_volume,
+
             "vwap": vwap,
+
             "rsi": rsi,
+
             "ema20": ema20,
+
             "ema50": ema50,
+
             "signal": signal,
+
             "confidence": confidence,
+
             "entry": safe_float(entry),
+
             "sl": safe_float(sl),
+
             "target": safe_float(target),
+
             "entry_time": entry_time
         }
 
     except Exception as e:
+
         print(f"{symbol}: {e}")
+
         return None
 
 
-def scan_market(symbols, limit=20):
+def add_category(results):
+
+    large = set(LARGE_CAP)
+    mid = set(MID_CAP)
+    small = set(SMALL_CAP)
+    fno = set(FNO_SYMBOLS)
+
+    for item in results:
+
+        symbol = item["symbol"]
+
+        if symbol in large:
+            item["category"] = "Large Cap"
+
+        elif symbol in mid:
+            item["category"] = "Mid Cap"
+
+        elif symbol in small:
+            item["category"] = "Small Cap"
+
+        else:
+            item["category"] = "Other"
+
+        item["fno"] = symbol in fno
+
+    return results
+
+
+def scan_market(symbols, limit=30):
+
     results = []
 
     for symbol in symbols:
+
         result = scan_symbol(symbol)
 
         if result:
             results.append(result)
+
+    results = add_category(results)
 
     results.sort(
         key=lambda x: (
@@ -288,22 +471,45 @@ def scan_market(symbols, limit=20):
     return results[:limit]
 
 
+# =========================
+# HOME
+# =========================
+
 @app.route("/")
 def home():
     return render_template("index.html")
 
 
+# =========================
+# HEALTH
+# =========================
+
 @app.route("/api/health")
 def health():
+
     return jsonify({
+
         "status": "ok",
-        "time_ist": datetime.now(IST).strftime("%d-%m-%Y %H:%M:%S")
+
+        "time_ist": datetime.now(
+            IST
+        ).strftime(
+            "%d-%m-%Y %H:%M:%S"
+        )
     })
 
 
+# =========================
+# ALL CASH
+# =========================
+
 @app.route("/api/scan")
 def api_scan():
-    results = scan_market(CASH_SYMBOLS, 20)
+
+    results = scan_market(
+        CASH_SYMBOLS,
+        50
+    )
 
     unusual = [
         x for x in results
@@ -311,45 +517,217 @@ def api_scan():
     ]
 
     return jsonify({
+
         "success": True,
+
         "scanned": len(CASH_SYMBOLS),
+
         "showing": len(results),
-        "scan_time_ist": datetime.now(IST).strftime(
+
+        "scan_time_ist": datetime.now(
+            IST
+        ).strftime(
             "%d-%m-%Y %H:%M:%S"
         ),
+
         "stocks": results,
+
         "unusual_volume": unusual
     })
 
 
-@app.route("/api/fno-stocks")
-def api_fno_stocks():
-    results = scan_market(FNO_SYMBOLS, 30)
+# =========================
+# LARGE CAP
+# =========================
+
+@app.route("/api/large-cap")
+def api_large_cap():
+
+    results = scan_market(
+        LARGE_CAP,
+        40
+    )
 
     return jsonify({
+
         "success": True,
-        "scan_time_ist": datetime.now(IST).strftime(
+
+        "category": "Large Cap",
+
+        "scanned": len(LARGE_CAP),
+
+        "stocks": results,
+
+        "scan_time_ist": datetime.now(
+            IST
+        ).strftime(
             "%d-%m-%Y %H:%M:%S"
-        ),
-        "stocks": results
+        )
     })
 
 
+# =========================
+# MID CAP
+# =========================
+
+@app.route("/api/mid-cap")
+def api_mid_cap():
+
+    results = scan_market(
+        MID_CAP,
+        40
+    )
+
+    return jsonify({
+
+        "success": True,
+
+        "category": "Mid Cap",
+
+        "scanned": len(MID_CAP),
+
+        "stocks": results,
+
+        "scan_time_ist": datetime.now(
+            IST
+        ).strftime(
+            "%d-%m-%Y %H:%M:%S"
+        )
+    })
+
+
+# =========================
+# SMALL CAP
+# =========================
+
+@app.route("/api/small-cap")
+def api_small_cap():
+
+    results = scan_market(
+        SMALL_CAP,
+        40
+    )
+
+    return jsonify({
+
+        "success": True,
+
+        "category": "Small Cap",
+
+        "scanned": len(SMALL_CAP),
+
+        "stocks": results,
+
+        "scan_time_ist": datetime.now(
+            IST
+        ).strftime(
+            "%d-%m-%Y %H:%M:%S"
+        )
+    })
+
+
+# =========================
+# F&O
+# =========================
+
+@app.route("/api/fno-stocks")
+def api_fno_stocks():
+
+    results = scan_market(
+        FNO_SYMBOLS,
+        40
+    )
+
+    return jsonify({
+
+        "success": True,
+
+        "category": "F&O",
+
+        "scanned": len(FNO_SYMBOLS),
+
+        "stocks": results,
+
+        "scan_time_ist": datetime.now(
+            IST
+        ).strftime(
+            "%d-%m-%Y %H:%M:%S"
+        )
+    })
+
+
+# =========================
+# UNUSUAL VOLUME
+# =========================
+
+@app.route("/api/unusual-volume")
+def api_unusual_volume():
+
+    results = scan_market(
+        CASH_SYMBOLS,
+        100
+    )
+
+    unusual = [
+        x for x in results
+        if x.get("unusual_volume")
+    ]
+
+    unusual.sort(
+        key=lambda x: (
+            x["volume_ratio"] or 0
+        ),
+        reverse=True
+    )
+
+    return jsonify({
+
+        "success": True,
+
+        "category": "Unusual Volume",
+
+        "stocks": unusual,
+
+        "scan_time_ist": datetime.now(
+            IST
+        ).strftime(
+            "%d-%m-%Y %H:%M:%S"
+        )
+    })
+
+
+# =========================
+# OPTIONS - DHAN LATER
+# =========================
+
 @app.route("/api/options")
 def api_options():
+
     return jsonify({
+
         "success": False,
+
         "message": (
-            "Dhan option-chain API integration is ready "
-            "for the next step. Add Dhan credentials in "
-            "Render Environment Variables."
+            "Dhan option-chain integration "
+            "will be added next."
         ),
-        "symbols": ["NIFTY", "SENSEX"]
+
+        "symbols": [
+            "NIFTY",
+            "SENSEX"
+        ]
     })
 
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
+
+    port = int(
+        os.environ.get(
+            "PORT",
+            5000
+        )
+    )
+
     app.run(
         host="0.0.0.0",
         port=port,

@@ -1,1 +1,675 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NSE Live Options Scanner</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #0b1220;
+            color: #ffffff;
+        }
+
+        .header {
+            padding: 18px 14px;
+            text-align: center;
+            background: #111c32;
+            border-bottom: 1px solid #263653;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 22px;
+        }
+
+        .header p {
+            margin: 7px 0 0;
+            color: #9fb0c8;
+            font-size: 13px;
+        }
+
+        .controls {
+            padding: 14px;
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            background: #0f192b;
+        }
+
+        button {
+            border: 0;
+            border-radius: 8px;
+            padding: 11px 14px;
+            background: #2563eb;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:active {
+            transform: scale(0.97);
+        }
+
+        .status {
+            padding: 10px 14px;
+            color: #aebbd0;
+            font-size: 13px;
+        }
+
+        .tabs {
+            display: flex;
+            overflow-x: auto;
+            gap: 7px;
+            padding: 0 12px 12px;
+        }
+
+        .tab {
+            background: #17243a;
+            white-space: nowrap;
+        }
+
+        .tab.active {
+            background: #2563eb;
+        }
+
+        .section {
+            display: none;
+            padding: 0 12px 25px;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: #111c30;
+            border: 1px solid #263653;
+            border-radius: 12px;
+            padding: 14px;
+            margin-bottom: 10px;
+        }
+
+        .top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .symbol {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .price {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .signal {
+            display: inline-block;
+            margin-top: 7px;
+            padding: 5px 9px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 12px;
+        }
+
+        .BUY {
+            background: #064e3b;
+            color: #6ee7b7;
+        }
+
+        .SELL {
+            background: #7f1d1d;
+            color: #fecaca;
+        }
+
+        .WAIT,
+        .WATCH {
+            background: #3f3410;
+            color: #fde68a;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .item {
+            background: #0b1527;
+            border-radius: 8px;
+            padding: 9px;
+        }
+
+        .label {
+            display: block;
+            color: #8292aa;
+            font-size: 11px;
+            margin-bottom: 3px;
+        }
+
+        .value {
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .green {
+            color: #4ade80;
+        }
+
+        .red {
+            color: #f87171;
+        }
+
+        .yellow {
+            color: #facc15;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px 10px;
+            color: #8292aa;
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 11px;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="header">
+    <h1>🚀 NSE LIVE OPTIONS SCANNER</h1>
+    <p>Momentum + Unusual Volume + F&O Scanner</p>
+</div>
+
+<div class="controls">
+    <button onclick="scanCash()">🔍 SCAN MARKET</button>
+    <button onclick="scanFNO()">⚡ F&O SCAN</button>
+    <button onclick="showIndex('nifty')">NIFTY OPTIONS</button>
+    <button onclick="showIndex('sensex')">SENSEX OPTIONS</button>
+</div>
+
+<div class="status" id="status">
+    Ready — press SCAN MARKET
+</div>
+
+<div class="tabs">
+    <button class="tab active" onclick="openTab('cash', this)">
+        CASH STOCKS
+    </button>
+
+    <button class="tab" onclick="openTab('fno', this)">
+        F&O STOCKS
+    </button>
+
+    <button class="tab" onclick="openTab('unusual', this)">
+        🔥 UNUSUAL VOLUME
+    </button>
+
+    <button class="tab" onclick="openTab('options', this)">
+        📊 INDEX OPTIONS
+    </button>
+</div>
+
+<div id="cash" class="section active">
+    <div id="cashList">
+        <div class="empty">
+            Press SCAN MARKET to load stocks
+        </div>
+    </div>
+</div>
+
+<div id="fno" class="section">
+    <div id="fnoList">
+        <div class="empty">
+            Press F&O SCAN
+        </div>
+    </div>
+</div>
+
+<div id="unusual" class="section">
+    <div id="unusualList">
+        <div class="empty">
+            Scan market first
+        </div>
+    </div>
+</div>
+
+<div id="options" class="section">
+    <div id="optionsList">
+        <div class="empty">
+            NIFTY / SENSEX option data will appear here
+        </div>
+    </div>
+</div>
+
+<div class="footer">
+    Scanner signals are for analysis only. Not guaranteed trading advice.
+</div>
+
+<script>
+
+function openTab(id, btn) {
+
+    document.querySelectorAll(".section").forEach(
+        x => x.classList.remove("active")
+    );
+
+    document.querySelectorAll(".tab").forEach(
+        x => x.classList.remove("active")
+    );
+
+    document.getElementById(id).classList.add("active");
+
+    if (btn) {
+        btn.classList.add("active");
+    }
+}
+
+
+function signalClass(signal) {
+    return signal || "WAIT";
+}
+
+
+function number(value, digits = 2) {
+
+    if (value === null || value === undefined) {
+        return "-";
+    }
+
+    let n = Number(value);
+
+    if (isNaN(n)) {
+        return "-";
+    }
+
+    return n.toFixed(digits);
+}
+
+
+function stockCard(s) {
+
+    let momentumClass =
+        Number(s.momentum) >= 0 ? "green" : "red";
+
+    let volumeClass =
+        Number(s.volume_ratio) >= 2 ? "yellow" : "";
+
+    return `
+        <div class="card">
+
+            <div class="top">
+                <div>
+                    <div class="symbol">${s.symbol}</div>
+
+                    <span class="signal ${signalClass(s.signal)}">
+                        ${s.signal}
+                    </span>
+                </div>
+
+                <div class="price">
+                    ₹${number(s.price)}
+                </div>
+            </div>
+
+            <div class="grid">
+
+                <div class="item">
+                    <span class="label">Momentum</span>
+                    <span class="value ${momentumClass}">
+                        ${number(s.momentum)}%
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Confidence</span>
+                    <span class="value">
+                        ${number(s.confidence, 0)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">RSI</span>
+                    <span class="value">
+                        ${number(s.rsi)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">VWAP</span>
+                    <span class="value">
+                        ₹${number(s.vwap)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Volume</span>
+                    <span class="value">
+                        ${number(s.volume, 0)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Volume Ratio</span>
+                    <span class="value ${volumeClass}">
+                        ${number(s.volume_ratio)}x
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Entry</span>
+                    <span class="value">
+                        ₹${number(s.entry)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Entry Time</span>
+                    <span class="value">
+                        ${s.entry_time || "-"}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Stop Loss</span>
+                    <span class="value red">
+                        ${s.sl ? "₹" + number(s.sl) : "-"}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Target</span>
+                    <span class="value green">
+                        ${s.target ? "₹" + number(s.target) : "-"}
+                    </span>
+                </div>
+
+            </div>
+        </div>
+    `;
+}
+
+
+function renderStocks(list, elementId) {
+
+    let box = document.getElementById(elementId);
+
+    if (!list || list.length === 0) {
+
+        box.innerHTML = `
+            <div class="empty">
+                No data available.
+            </div>
+        `;
+
+        return;
+    }
+
+    box.innerHTML = list.map(stockCard).join("");
+}
+
+
+async function scanCash() {
+
+    document.getElementById("status").innerText =
+        "⏳ Scanning cash market...";
+
+    try {
+
+        let response =
+            await fetch("/api/scan");
+
+        let data =
+            await response.json();
+
+        renderStocks(data.stocks, "cashList");
+
+        renderStocks(data.unusual_volume, "unusualList");
+
+        document.getElementById("status").innerText =
+            "✅ Scanned " +
+            data.scanned +
+            " stocks • Showing " +
+            data.showing +
+            " • " +
+            data.scan_time_ist;
+
+        openTab("cash", document.querySelector(".tab"));
+
+    } catch (error) {
+
+        document.getElementById("status").innerText =
+            "❌ Scan failed. Please try again.";
+
+        console.error(error);
+    }
+}
+
+
+async function scanFNO() {
+
+    document.getElementById("status").innerText =
+        "⏳ Scanning F&O stocks...";
+
+    openTab(
+        "fno",
+        document.querySelectorAll(".tab")[1]
+    );
+
+    try {
+
+        let response =
+            await fetch("/api/fno-stocks");
+
+        let data =
+            await response.json();
+
+        renderStocks(data.stocks, "fnoList");
+
+        document.getElementById("status").innerText =
+            "✅ F&O scan completed • " +
+            data.scan_time_ist;
+
+    } catch (error) {
+
+        document.getElementById("status").innerText =
+            "❌ F&O scan failed.";
+
+        console.error(error);
+    }
+}
+
+
+async function showIndex(index) {
+
+    openTab(
+        "options",
+        document.querySelectorAll(".tab")[3]
+    );
+
+    document.getElementById("optionsList").innerHTML = `
+        <div class="empty">
+            ⏳ Loading ${index.toUpperCase()} options...
+        </div>
+    `;
+
+    try {
+
+        let symbol =
+            index.toUpperCase();
+
+        let response =
+            await fetch("/api/options?symbol=" + symbol);
+
+        let data =
+            await response.json();
+
+        if (!data.success) {
+
+            document.getElementById("optionsList").innerHTML = `
+                <div class="card">
+                    <div class="symbol">
+                        ${symbol} OPTIONS
+                    </div>
+
+                    <p style="color:#9fb0c8">
+                        ${data.message}
+                    </p>
+
+                    <p style="color:#facc15">
+                        Dhan API credentials add karne ke baad
+                        live option-chain yahan show hoga.
+                    </p>
+                </div>
+            `;
+
+            return;
+        }
+
+        renderOptions(data.options);
+
+    } catch (error) {
+
+        document.getElementById("optionsList").innerHTML = `
+            <div class="empty">
+                ❌ Options data unavailable
+            </div>
+        `;
+
+        console.error(error);
+    }
+}
+
+
+function renderOptions(options) {
+
+    let box =
+        document.getElementById("optionsList");
+
+    if (!options || options.length === 0) {
+
+        box.innerHTML = `
+            <div class="empty">
+                No option data available.
+            </div>
+        `;
+
+        return;
+    }
+
+    box.innerHTML = options.map(o => `
+
+        <div class="card">
+
+            <div class="top">
+
+                <div>
+                    <div class="symbol">
+                        ${o.symbol || "-"}
+                    </div>
+
+                    <span class="signal ${signalClass(o.signal)}">
+                        ${o.signal || "WATCH"}
+                    </span>
+                </div>
+
+                <div class="price">
+                    ₹${number(o.ltp)}
+                </div>
+
+            </div>
+
+            <div class="grid">
+
+                <div class="item">
+                    <span class="label">Type</span>
+                    <span class="value">
+                        ${o.type || "-"}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Strike</span>
+                    <span class="value">
+                        ${number(o.strike)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">OI</span>
+                    <span class="value">
+                        ${number(o.oi, 0)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Change OI</span>
+                    <span class="value">
+                        ${number(o.change_oi, 0)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Volume</span>
+                    <span class="value">
+                        ${number(o.volume, 0)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">IV</span>
+                    <span class="value">
+                        ${number(o.iv)}%
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Bid</span>
+                    <span class="value">
+                        ₹${number(o.bid)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Ask</span>
+                    <span class="value">
+                        ₹${number(o.ask)}
+                    </span>
+                </div>
+
+                <div class="item">
+                    <span class="label">Entry Time</span>
+                    <span class="value">
+                        ${o.entry_time || "-"}
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+    `).join("");
+}
+
+
+</script>
+
+</body>
+</html>

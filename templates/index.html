@@ -1,10 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NSE Live Options Scanner</title>
+
+    <title>NSE Live Stock Scanner</title>
 
     <style>
         * {
@@ -13,55 +13,53 @@
 
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
-            background: #0b1220;
+            background: #07111f;
             color: #ffffff;
+            font-family: Arial, sans-serif;
         }
 
-        .header {
-            padding: 18px 14px;
+        header {
+            padding: 20px 15px;
             text-align: center;
-            background: #111c32;
-            border-bottom: 1px solid #263653;
+            background: #0d1b2d;
+            border-bottom: 1px solid #24364d;
         }
 
-        .header h1 {
+        h1 {
             margin: 0;
-            font-size: 22px;
+            font-size: 24px;
         }
 
-        .header p {
-            margin: 7px 0 0;
-            color: #9fb0c8;
+        .subtitle {
+            margin-top: 7px;
+            color: #9fb0c5;
             font-size: 13px;
         }
 
-        .controls {
-            padding: 14px;
-            display: flex;
+        .buttons {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
             gap: 8px;
-            flex-wrap: wrap;
-            background: #0f192b;
+            padding: 12px;
         }
 
         button {
             border: 0;
-            border-radius: 8px;
-            padding: 11px 14px;
-            background: #2563eb;
+            border-radius: 10px;
+            padding: 13px 8px;
+            background: #17283d;
             color: white;
             font-weight: bold;
             cursor: pointer;
         }
 
-        button:active {
-            transform: scale(0.97);
+        button:hover {
+            background: #223b59;
         }
 
-        .status {
-            padding: 10px 14px;
-            color: #aebbd0;
-            font-size: 13px;
+        .scan {
+            grid-column: span 2;
+            background: #176b46;
         }
 
         .tabs {
@@ -71,30 +69,31 @@
             padding: 0 12px 12px;
         }
 
-        .tab {
-            background: #17243a;
+        .tabs button {
             white-space: nowrap;
         }
 
-        .tab.active {
-            background: #2563eb;
+        .active {
+            background: #285985;
         }
 
-        .section {
-            display: none;
-            padding: 0 12px 25px;
+        #status {
+            text-align: center;
+            padding: 8px;
+            color: #9fb0c5;
+            font-size: 13px;
         }
 
-        .section.active {
-            display: block;
+        #stocks {
+            padding: 10px 12px 30px;
         }
 
         .card {
-            background: #111c30;
-            border: 1px solid #263653;
-            border-radius: 12px;
-            padding: 14px;
-            margin-bottom: 10px;
+            background: #0d1b2d;
+            border: 1px solid #24364d;
+            border-radius: 14px;
+            padding: 15px;
+            margin-bottom: 12px;
         }
 
         .top {
@@ -105,569 +104,486 @@
         }
 
         .symbol {
-            font-size: 18px;
+            font-size: 20px;
             font-weight: bold;
         }
 
-        .price {
-            font-size: 18px;
-            font-weight: bold;
+        .category {
+            color: #9fb0c5;
+            font-size: 12px;
+            margin-top: 3px;
         }
 
         .signal {
-            display: inline-block;
-            margin-top: 7px;
-            padding: 5px 9px;
-            border-radius: 6px;
+            padding: 7px 10px;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 13px;
         }
 
-        .BUY {
-            background: #064e3b;
-            color: #6ee7b7;
+        .buy {
+            background: #145c3d;
+            color: #63f0ae;
         }
 
-        .SELL {
-            background: #7f1d1d;
-            color: #fecaca;
+        .sell {
+            background: #682d36;
+            color: #ff8e9b;
         }
 
-        .WAIT,
-        .WATCH {
-            background: #3f3410;
-            color: #fde68a;
+        .wait {
+            background: #51461c;
+            color: #f5db70;
+        }
+
+        .price {
+            font-size: 23px;
+            font-weight: bold;
+            margin: 12px 0;
         }
 
         .grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 8px;
-            margin-top: 12px;
         }
 
         .item {
-            background: #0b1527;
+            background: #111f32;
             border-radius: 8px;
             padding: 9px;
         }
 
         .label {
-            display: block;
-            color: #8292aa;
+            color: #8295ab;
             font-size: 11px;
-            margin-bottom: 3px;
         }
 
         .value {
-            font-size: 13px;
+            margin-top: 4px;
             font-weight: bold;
+            font-size: 14px;
         }
 
-        .green {
-            color: #4ade80;
+        .entry {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 8px;
+            background: #162b42;
         }
 
-        .red {
-            color: #f87171;
-        }
-
-        .yellow {
-            color: #facc15;
+        .entry-row {
+            display: flex;
+            justify-content: space-between;
+            margin: 5px 0;
         }
 
         .empty {
             text-align: center;
-            padding: 30px 10px;
-            color: #8292aa;
+            padding: 35px 15px;
+            color: #8ea0b5;
         }
 
-        .footer {
+        footer {
             text-align: center;
-            color: #64748b;
-            font-size: 11px;
             padding: 20px;
+            color: #718398;
+            font-size: 11px;
+        }
+
+        @media (min-width: 700px) {
+
+            .buttons {
+                grid-template-columns: repeat(4, 1fr);
+                max-width: 900px;
+                margin: auto;
+            }
+
+            .scan {
+                grid-column: span 4;
+            }
+
+            #stocks {
+                max-width: 900px;
+                margin: auto;
+            }
         }
     </style>
 </head>
 
 <body>
 
-<div class="header">
-    <h1>🚀 NSE LIVE OPTIONS SCANNER</h1>
-    <p>Momentum + Unusual Volume + F&O Scanner</p>
-</div>
+<header>
+    <h1>🚀 NSE LIVE STOCK SCANNER</h1>
 
-<div class="controls">
-    <button onclick="scanCash()">🔍 SCAN MARKET</button>
-    <button onclick="scanFNO()">⚡ F&O SCAN</button>
-    <button onclick="showIndex('nifty')">NIFTY OPTIONS</button>
-    <button onclick="showIndex('sensex')">SENSEX OPTIONS</button>
-</div>
+    <div class="subtitle">
+        Momentum + Unusual Volume + Market Cap Scanner
+    </div>
+</header>
 
-<div class="status" id="status">
-    Ready — press SCAN MARKET
-</div>
 
-<div class="tabs">
-    <button class="tab active" onclick="openTab('cash', this)">
-        CASH STOCKS
+<div class="buttons">
+
+    <button class="scan" onclick="scanAll()">
+        🔎 SCAN ALL STOCKS
     </button>
 
-    <button class="tab" onclick="openTab('fno', this)">
-        F&O STOCKS
+    <button onclick="loadCategory('large')">
+        🟢 LARGE CAP
     </button>
 
-    <button class="tab" onclick="openTab('unusual', this)">
+    <button onclick="loadCategory('mid')">
+        🔵 MID CAP
+    </button>
+
+    <button onclick="loadCategory('small')">
+        🟠 SMALL CAP
+    </button>
+
+    <button onclick="loadCategory('fno')">
+        📊 F&O STOCKS
+    </button>
+
+    <button onclick="loadCategory('unusual')">
         🔥 UNUSUAL VOLUME
     </button>
 
-    <button class="tab" onclick="openTab('options', this)">
-        📊 INDEX OPTIONS
+</div>
+
+
+<div class="tabs">
+
+    <button id="tab-large" onclick="loadCategory('large')">
+        Large Cap
     </button>
+
+    <button id="tab-mid" onclick="loadCategory('mid')">
+        Mid Cap
+    </button>
+
+    <button id="tab-small" onclick="loadCategory('small')">
+        Small Cap
+    </button>
+
+    <button id="tab-fno" onclick="loadCategory('fno')">
+        F&O
+    </button>
+
+    <button id="tab-unusual" onclick="loadCategory('unusual')">
+        Unusual Volume
+    </button>
+
 </div>
 
-<div id="cash" class="section active">
-    <div id="cashList">
-        <div class="empty">
-            Press SCAN MARKET to load stocks
-        </div>
+
+<div id="status">
+    Ready to scan
+</div>
+
+
+<div id="stocks">
+
+    <div class="empty">
+        👆 Category select karke scanner start karein
     </div>
+
 </div>
 
-<div id="fno" class="section">
-    <div id="fnoList">
-        <div class="empty">
-            Press F&O SCAN
-        </div>
-    </div>
-</div>
 
-<div id="unusual" class="section">
-    <div id="unusualList">
-        <div class="empty">
-            Scan market first
-        </div>
-    </div>
-</div>
+<footer>
+    Scanner signals are for analysis only.
+    Not guaranteed trading advice.
+</footer>
 
-<div id="options" class="section">
-    <div id="optionsList">
-        <div class="empty">
-            NIFTY / SENSEX option data will appear here
-        </div>
-    </div>
-</div>
-
-<div class="footer">
-    Scanner signals are for analysis only. Not guaranteed trading advice.
-</div>
 
 <script>
 
-function openTab(id, btn) {
-
-    document.querySelectorAll(".section").forEach(
-        x => x.classList.remove("active")
-    );
-
-    document.querySelectorAll(".tab").forEach(
-        x => x.classList.remove("active")
-    );
-
-    document.getElementById(id).classList.add("active");
-
-    if (btn) {
-        btn.classList.add("active");
-    }
+function setStatus(text) {
+    document.getElementById("status").innerText = text;
 }
 
 
-function signalClass(signal) {
-    return signal || "WAIT";
-}
-
-
-function number(value, digits = 2) {
+function formatNumber(value) {
 
     if (value === null || value === undefined) {
         return "-";
     }
 
-    let n = Number(value);
-
-    if (isNaN(n)) {
-        return "-";
+    if (typeof value === "number") {
+        return value.toFixed(2);
     }
 
-    return n.toFixed(digits);
+    return value;
 }
 
 
-function stockCard(s) {
+function stockCard(stock) {
 
-    let momentumClass =
-        Number(s.momentum) >= 0 ? "green" : "red";
+    let signalClass = "wait";
 
-    let volumeClass =
-        Number(s.volume_ratio) >= 2 ? "yellow" : "";
+    if (stock.signal === "BUY") {
+        signalClass = "buy";
+    }
+
+    if (stock.signal === "SELL") {
+        signalClass = "sell";
+    }
 
     return `
+
         <div class="card">
 
             <div class="top">
+
                 <div>
-                    <div class="symbol">${s.symbol}</div>
+                    <div class="symbol">
+                        ${stock.symbol}
+                    </div>
 
-                    <span class="signal ${signalClass(s.signal)}">
-                        ${s.signal}
-                    </span>
+                    <div class="category">
+                        ${stock.category || ""}
+                        ${stock.fno ? " • F&O" : ""}
+                    </div>
                 </div>
 
-                <div class="price">
-                    ₹${number(s.price)}
+                <div class="signal ${signalClass}">
+                    ${stock.signal}
                 </div>
+
             </div>
+
+
+            <div class="price">
+                ₹${formatNumber(stock.price)}
+            </div>
+
 
             <div class="grid">
 
                 <div class="item">
-                    <span class="label">Momentum</span>
-                    <span class="value ${momentumClass}">
-                        ${number(s.momentum)}%
-                    </span>
+                    <div class="label">Momentum</div>
+                    <div class="value">
+                        ${formatNumber(stock.momentum)}%
+                    </div>
                 </div>
 
                 <div class="item">
-                    <span class="label">Confidence</span>
-                    <span class="value">
-                        ${number(s.confidence, 0)}
-                    </span>
+                    <div class="label">Confidence</div>
+                    <div class="value">
+                        ${formatNumber(stock.confidence)}
+                    </div>
                 </div>
 
                 <div class="item">
-                    <span class="label">RSI</span>
-                    <span class="value">
-                        ${number(s.rsi)}
-                    </span>
+                    <div class="label">RSI</div>
+                    <div class="value">
+                        ${formatNumber(stock.rsi)}
+                    </div>
                 </div>
 
                 <div class="item">
-                    <span class="label">VWAP</span>
-                    <span class="value">
-                        ₹${number(s.vwap)}
-                    </span>
+                    <div class="label">VWAP</div>
+                    <div class="value">
+                        ₹${formatNumber(stock.vwap)}
+                    </div>
                 </div>
 
                 <div class="item">
-                    <span class="label">Volume</span>
-                    <span class="value">
-                        ${number(s.volume, 0)}
-                    </span>
+                    <div class="label">Volume Ratio</div>
+                    <div class="value">
+                        ${formatNumber(stock.volume_ratio)}x
+                    </div>
                 </div>
 
                 <div class="item">
-                    <span class="label">Volume Ratio</span>
-                    <span class="value ${volumeClass}">
-                        ${number(s.volume_ratio)}x
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Entry</span>
-                    <span class="value">
-                        ₹${number(s.entry)}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Entry Time</span>
-                    <span class="value">
-                        ${s.entry_time || "-"}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Stop Loss</span>
-                    <span class="value red">
-                        ${s.sl ? "₹" + number(s.sl) : "-"}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Target</span>
-                    <span class="value green">
-                        ${s.target ? "₹" + number(s.target) : "-"}
-                    </span>
+                    <div class="label">Unusual Volume</div>
+                    <div class="value">
+                        ${stock.unusual_volume ? "🔥 YES" : "No"}
+                    </div>
                 </div>
 
             </div>
+
+
+            <div class="entry">
+
+                <div class="entry-row">
+                    <span>Entry</span>
+                    <strong>
+                        ₹${formatNumber(stock.entry)}
+                    </strong>
+                </div>
+
+                <div class="entry-row">
+                    <span>Stop Loss</span>
+                    <strong>
+                        ${stock.sl !== null
+                            ? "₹" + formatNumber(stock.sl)
+                            : "-"
+                        }
+                    </strong>
+                </div>
+
+                <div class="entry-row">
+                    <span>Target</span>
+                    <strong>
+                        ${stock.target !== null
+                            ? "₹" + formatNumber(stock.target)
+                            : "-"
+                        }
+                    </strong>
+                </div>
+
+                <div class="entry-row">
+                    <span>Signal Time</span>
+                    <strong>
+                        ${stock.entry_time || "-"}
+                    </strong>
+                </div>
+
+            </div>
+
         </div>
+
     `;
 }
 
 
-function renderStocks(list, elementId) {
+function renderStocks(stocks) {
 
-    let box = document.getElementById(elementId);
+    const container =
+        document.getElementById("stocks");
 
-    if (!list || list.length === 0) {
+    if (!stocks || stocks.length === 0) {
 
-        box.innerHTML = `
+        container.innerHTML = `
             <div class="empty">
-                No data available.
+                😕 Is category mein abhi data nahi mila.
             </div>
         `;
 
         return;
     }
 
-    box.innerHTML = list.map(stockCard).join("");
+    container.innerHTML =
+        stocks.map(stockCard).join("");
 }
 
 
-async function scanCash() {
-
-    document.getElementById("status").innerText =
-        "⏳ Scanning cash market...";
+async function fetchStocks(url, title) {
 
     try {
 
-        let response =
-            await fetch("/api/scan");
+        setStatus(
+            "⏳ " + title + " scanning..."
+        );
 
-        let data =
-            await response.json();
+        const response =
+            await fetch(url);
 
-        renderStocks(data.stocks, "cashList");
-
-        renderStocks(data.unusual_volume, "unusualList");
-
-        document.getElementById("status").innerText =
-            "✅ Scanned " +
-            data.scanned +
-            " stocks • Showing " +
-            data.showing +
-            " • " +
-            data.scan_time_ist;
-
-        openTab("cash", document.querySelector(".tab"));
-
-    } catch (error) {
-
-        document.getElementById("status").innerText =
-            "❌ Scan failed. Please try again.";
-
-        console.error(error);
-    }
-}
-
-
-async function scanFNO() {
-
-    document.getElementById("status").innerText =
-        "⏳ Scanning F&O stocks...";
-
-    openTab(
-        "fno",
-        document.querySelectorAll(".tab")[1]
-    );
-
-    try {
-
-        let response =
-            await fetch("/api/fno-stocks");
-
-        let data =
-            await response.json();
-
-        renderStocks(data.stocks, "fnoList");
-
-        document.getElementById("status").innerText =
-            "✅ F&O scan completed • " +
-            data.scan_time_ist;
-
-    } catch (error) {
-
-        document.getElementById("status").innerText =
-            "❌ F&O scan failed.";
-
-        console.error(error);
-    }
-}
-
-
-async function showIndex(index) {
-
-    openTab(
-        "options",
-        document.querySelectorAll(".tab")[3]
-    );
-
-    document.getElementById("optionsList").innerHTML = `
-        <div class="empty">
-            ⏳ Loading ${index.toUpperCase()} options...
-        </div>
-    `;
-
-    try {
-
-        let symbol =
-            index.toUpperCase();
-
-        let response =
-            await fetch("/api/options?symbol=" + symbol);
-
-        let data =
+        const data =
             await response.json();
 
         if (!data.success) {
 
-            document.getElementById("optionsList").innerHTML = `
-                <div class="card">
-                    <div class="symbol">
-                        ${symbol} OPTIONS
-                    </div>
-
-                    <p style="color:#9fb0c8">
-                        ${data.message}
-                    </p>
-
-                    <p style="color:#facc15">
-                        Dhan API credentials add karne ke baad
-                        live option-chain yahan show hoga.
-                    </p>
-                </div>
-            `;
+            setStatus(
+                "❌ Scanner error"
+            );
 
             return;
         }
 
-        renderOptions(data.options);
+        renderStocks(data.stocks || []);
+
+        setStatus(
+            "✅ " +
+            title +
+            " • " +
+            (data.stocks || []).length +
+            " stocks"
+        );
 
     } catch (error) {
 
-        document.getElementById("optionsList").innerHTML = `
-            <div class="empty">
-                ❌ Options data unavailable
-            </div>
-        `;
-
         console.error(error);
-    }
-}
 
+        setStatus(
+            "❌ Data load error"
+        );
 
-function renderOptions(options) {
-
-    let box =
-        document.getElementById("optionsList");
-
-    if (!options || options.length === 0) {
-
-        box.innerHTML = `
+        document.getElementById("stocks").innerHTML = `
             <div class="empty">
-                No option data available.
+                Server/data error. Please try again.
             </div>
         `;
-
-        return;
     }
-
-    box.innerHTML = options.map(o => `
-
-        <div class="card">
-
-            <div class="top">
-
-                <div>
-                    <div class="symbol">
-                        ${o.symbol || "-"}
-                    </div>
-
-                    <span class="signal ${signalClass(o.signal)}">
-                        ${o.signal || "WATCH"}
-                    </span>
-                </div>
-
-                <div class="price">
-                    ₹${number(o.ltp)}
-                </div>
-
-            </div>
-
-            <div class="grid">
-
-                <div class="item">
-                    <span class="label">Type</span>
-                    <span class="value">
-                        ${o.type || "-"}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Strike</span>
-                    <span class="value">
-                        ${number(o.strike)}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">OI</span>
-                    <span class="value">
-                        ${number(o.oi, 0)}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Change OI</span>
-                    <span class="value">
-                        ${number(o.change_oi, 0)}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Volume</span>
-                    <span class="value">
-                        ${number(o.volume, 0)}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">IV</span>
-                    <span class="value">
-                        ${number(o.iv)}%
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Bid</span>
-                    <span class="value">
-                        ₹${number(o.bid)}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Ask</span>
-                    <span class="value">
-                        ₹${number(o.ask)}
-                    </span>
-                </div>
-
-                <div class="item">
-                    <span class="label">Entry Time</span>
-                    <span class="value">
-                        ${o.entry_time || "-"}
-                    </span>
-                </div>
-
-            </div>
-
-        </div>
-
-    `).join("");
 }
 
+
+function loadCategory(category) {
+
+    if (category === "large") {
+
+        fetchStocks(
+            "/api/large-cap",
+            "Large Cap"
+        );
+
+    }
+
+    else if (category === "mid") {
+
+        fetchStocks(
+            "/api/mid-cap",
+            "Mid Cap"
+        );
+
+    }
+
+    else if (category === "small") {
+
+        fetchStocks(
+            "/api/small-cap",
+            "Small Cap"
+        );
+
+    }
+
+    else if (category === "fno") {
+
+        fetchStocks(
+            "/api/fno-stocks",
+            "F&O"
+        );
+
+    }
+
+    else if (category === "unusual") {
+
+        fetchStocks(
+            "/api/unusual-volume",
+            "Unusual Volume"
+        );
+
+    }
+}
+
+
+function scanAll() {
+
+    fetchStocks(
+        "/api/scan",
+        "All Stocks"
+    );
+
+}
+
+
+window.onload = function() {
+
+    loadCategory("large");
+
+};
 
 </script>
 

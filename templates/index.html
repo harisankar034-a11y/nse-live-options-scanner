@@ -1,591 +1,163 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-    <title>NSE Live Stock Scanner</title>
-
-    <style>
-        * {
-            box-sizing: border-box;
-        }
-
-        body {
-            margin: 0;
-            background: #07111f;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
-        }
-
-        header {
-            padding: 20px 15px;
-            text-align: center;
-            background: #0d1b2d;
-            border-bottom: 1px solid #24364d;
-        }
-
-        h1 {
-            margin: 0;
-            font-size: 24px;
-        }
-
-        .subtitle {
-            margin-top: 7px;
-            color: #9fb0c5;
-            font-size: 13px;
-        }
-
-        .buttons {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-            padding: 12px;
-        }
-
-        button {
-            border: 0;
-            border-radius: 10px;
-            padding: 13px 8px;
-            background: #17283d;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #223b59;
-        }
-
-        .scan {
-            grid-column: span 2;
-            background: #176b46;
-        }
-
-        .tabs {
-            display: flex;
-            overflow-x: auto;
-            gap: 7px;
-            padding: 0 12px 12px;
-        }
-
-        .tabs button {
-            white-space: nowrap;
-        }
-
-        .active {
-            background: #285985;
-        }
-
-        #status {
-            text-align: center;
-            padding: 8px;
-            color: #9fb0c5;
-            font-size: 13px;
-        }
-
-        #stocks {
-            padding: 10px 12px 30px;
-        }
-
-        .card {
-            background: #0d1b2d;
-            border: 1px solid #24364d;
-            border-radius: 14px;
-            padding: 15px;
-            margin-bottom: 12px;
-        }
-
-        .top {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .symbol {
-            font-size: 20px;
-            font-weight: bold;
-        }
-
-        .category {
-            color: #9fb0c5;
-            font-size: 12px;
-            margin-top: 3px;
-        }
-
-        .signal {
-            padding: 7px 10px;
-            border-radius: 8px;
-            font-weight: bold;
-            font-size: 13px;
-        }
-
-        .buy {
-            background: #145c3d;
-            color: #63f0ae;
-        }
-
-        .sell {
-            background: #682d36;
-            color: #ff8e9b;
-        }
-
-        .wait {
-            background: #51461c;
-            color: #f5db70;
-        }
-
-        .price {
-            font-size: 23px;
-            font-weight: bold;
-            margin: 12px 0;
-        }
-
-        .grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 8px;
-        }
-
-        .item {
-            background: #111f32;
-            border-radius: 8px;
-            padding: 9px;
-        }
-
-        .label {
-            color: #8295ab;
-            font-size: 11px;
-        }
-
-        .value {
-            margin-top: 4px;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        .entry {
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 8px;
-            background: #162b42;
-        }
-
-        .entry-row {
-            display: flex;
-            justify-content: space-between;
-            margin: 5px 0;
-        }
-
-        .empty {
-            text-align: center;
-            padding: 35px 15px;
-            color: #8ea0b5;
-        }
-
-        footer {
-            text-align: center;
-            padding: 20px;
-            color: #718398;
-            font-size: 11px;
-        }
-
-        @media (min-width: 700px) {
-
-            .buttons {
-                grid-template-columns: repeat(4, 1fr);
-                max-width: 900px;
-                margin: auto;
-            }
-
-            .scan {
-                grid-column: span 4;
-            }
-
-            #stocks {
-                max-width: 900px;
-                margin: auto;
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NSE Live Stock Scanner</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#07111f;color:#fff;font-family:Arial,sans-serif}
+header{padding:18px 14px;text-align:center;background:#0d1b2d;border-bottom:1px solid #24364d}
+h1{margin:0;font-size:23px}.subtitle{margin-top:6px;color:#9fb0c5;font-size:12px}
+.buttons{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:12px;max-width:900px;margin:auto}
+button{border:0;border-radius:10px;padding:12px 7px;background:#17283d;color:white;font-weight:bold}
+button:active{transform:scale(.98)}.scan{grid-column:span 2;background:#176b46}
+.tabs{display:flex;gap:7px;overflow-x:auto;padding:0 12px 10px;max-width:900px;margin:auto}
+.tabs button{white-space:nowrap}.active{background:#285985!important}
+#status{text-align:center;padding:8px;color:#9fb0c5;font-size:13px}
+#stocks{padding:8px 12px 30px;max-width:900px;margin:auto}
+.card{background:#0d1b2d;border:1px solid #24364d;border-radius:14px;padding:14px;margin-bottom:12px}
+.card.earlybuy{border-color:#b99a24}.card.earlysell{border-color:#a84858}
+.top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.symbol{font-size:20px;font-weight:bold}.category{font-size:12px;color:#9fb0c5;margin-top:3px}
+.signal{padding:8px 9px;border-radius:8px;font-size:12px;font-weight:bold;text-align:center}
+.signal.buy{background:#145c3d;color:#63f0ae}.signal.sell{background:#682d36;color:#ff9ba6}
+.signal.earlybuy{background:#5b4d16;color:#ffe77a}.signal.earlysell{background:#5a2932;color:#ff9aaa}
+.signal.wait{background:#51461c;color:#f5db70}
+.price{font-size:23px;font-weight:bold;margin:11px 0}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:7px}
+.item{background:#111f32;border-radius:8px;padding:8px}.label{font-size:10px;color:#8295ab}
+.value{font-size:13px;font-weight:bold;margin-top:3px;word-break:break-word}
+.setup{margin-top:9px;padding:10px;border-radius:9px;background:#101d2e;font-size:12px;line-height:1.45}
+.setup b{font-size:13px}.reason{margin-top:5px;color:#d8e2ef}
+.entry{margin-top:9px;padding:10px;border-radius:9px;background:#162b42}
+.entry-row{display:flex;justify-content:space-between;margin:5px 0;font-size:13px}
+.empty{text-align:center;padding:35px 15px;color:#8ea0b5}
+footer{text-align:center;padding:18px;color:#718398;font-size:10px}
+</style>
 </head>
-
 <body>
 
 <header>
-    <h1>🚀 NSE LIVE STOCK SCANNER</h1>
-
-    <div class="subtitle">
-        Momentum + Unusual Volume + Market Cap Scanner
-    </div>
+<h1>🚀 NSE LIVE STOCK SCANNER</h1>
+<div class="subtitle">Early Warning + Momentum + Unusual Volume + Market Cap</div>
 </header>
 
-
 <div class="buttons">
-
-    <button class="scan" onclick="scanAll()">
-        🔎 SCAN ALL STOCKS
-    </button>
-
-    <button onclick="loadCategory('large')">
-        🟢 LARGE CAP
-    </button>
-
-    <button onclick="loadCategory('mid')">
-        🔵 MID CAP
-    </button>
-
-    <button onclick="loadCategory('small')">
-        🟠 SMALL CAP
-    </button>
-
-    <button onclick="loadCategory('fno')">
-        📊 F&O STOCKS
-    </button>
-
-    <button onclick="loadCategory('unusual')">
-        🔥 UNUSUAL VOLUME
-    </button>
-
+<button class="scan" onclick="loadApi('/api/scan','All Stocks')">🔎 SCAN ALL STOCKS</button>
+<button onclick="loadApi('/api/large-cap','Large Cap')">🟢 LARGE CAP</button>
+<button onclick="loadApi('/api/mid-cap','Mid Cap')">🔵 MID CAP</button>
+<button onclick="loadApi('/api/small-cap','Small Cap')">🟠 SMALL CAP</button>
+<button onclick="loadApi('/api/fno-stocks','F&O')">📊 F&O STOCKS</button>
+<button onclick="loadApi('/api/unusual-volume','Unusual Volume')">🔥 UNUSUAL VOLUME</button>
 </div>
-
 
 <div class="tabs">
-
-    <button id="tab-large" onclick="loadCategory('large')">
-        Large Cap
-    </button>
-
-    <button id="tab-mid" onclick="loadCategory('mid')">
-        Mid Cap
-    </button>
-
-    <button id="tab-small" onclick="loadCategory('small')">
-        Small Cap
-    </button>
-
-    <button id="tab-fno" onclick="loadCategory('fno')">
-        F&O
-    </button>
-
-    <button id="tab-unusual" onclick="loadCategory('unusual')">
-        Unusual Volume
-    </button>
-
+<button id="tab-large" onclick="loadApi('/api/large-cap','Large Cap')">Large Cap</button>
+<button id="tab-mid" onclick="loadApi('/api/mid-cap','Mid Cap')">Mid Cap</button>
+<button id="tab-small" onclick="loadApi('/api/small-cap','Small Cap')">Small Cap</button>
+<button id="tab-fno" onclick="loadApi('/api/fno-stocks','F&O')">F&O</button>
+<button id="tab-unusual" onclick="loadApi('/api/unusual-volume','Unusual Volume')">Unusual Volume</button>
 </div>
 
+<div id="status">Ready</div>
+<div id="stocks"><div class="empty">Loading scanner...</div></div>
 
-<div id="status">
-    Ready to scan
-</div>
-
-
-<div id="stocks">
-
-    <div class="empty">
-        👆 Category select karke scanner start karein
-    </div>
-
-</div>
-
-
-<footer>
-    Scanner signals are for analysis only.
-    Not guaranteed trading advice.
-</footer>
-
+<footer>Analysis only — signals are not guaranteed trading advice.</footer>
 
 <script>
-
-function setStatus(text) {
-    document.getElementById("status").innerText = text;
+function val(v, suffix=""){
+    if(v===null || v===undefined || v==="") return "-";
+    const n=Number(v);
+    return Number.isFinite(n) ? n.toFixed(2)+suffix : String(v);
 }
-
-
-function formatNumber(value) {
-
-    if (value === null || value === undefined) {
-        return "-";
-    }
-
-    if (typeof value === "number") {
-        return value.toFixed(2);
-    }
-
-    return value;
+function rupee(v){
+    if(v===null || v===undefined || v==="") return "-";
+    const n=Number(v);
+    return Number.isFinite(n) ? "₹"+n.toFixed(2) : String(v);
 }
-
-
-function stockCard(stock) {
-
-    let signalClass = "wait";
-
-    if (stock.signal === "BUY") {
-        signalClass = "buy";
-    }
-
-    if (stock.signal === "SELL") {
-        signalClass = "sell";
-    }
-
-    return `
-
-        <div class="card">
-
-            <div class="top">
-
-                <div>
-                    <div class="symbol">
-                        ${stock.symbol}
-                    </div>
-
-                    <div class="category">
-                        ${stock.category || ""}
-                        ${stock.fno ? " • F&O" : ""}
-                    </div>
-                </div>
-
-                <div class="signal ${signalClass}">
-                    ${stock.signal}
-                </div>
-
-            </div>
-
-
-            <div class="price">
-                ₹${formatNumber(stock.price)}
-            </div>
-
-
-            <div class="grid">
-
-                <div class="item">
-                    <div class="label">Momentum</div>
-                    <div class="value">
-                        ${formatNumber(stock.momentum)}%
-                    </div>
-                </div>
-
-                <div class="item">
-                    <div class="label">Confidence</div>
-                    <div class="value">
-                        ${formatNumber(stock.confidence)}
-                    </div>
-                </div>
-
-                <div class="item">
-                    <div class="label">RSI</div>
-                    <div class="value">
-                        ${formatNumber(stock.rsi)}
-                    </div>
-                </div>
-
-                <div class="item">
-                    <div class="label">VWAP</div>
-                    <div class="value">
-                        ₹${formatNumber(stock.vwap)}
-                    </div>
-                </div>
-
-                <div class="item">
-                    <div class="label">Volume Ratio</div>
-                    <div class="value">
-                        ${formatNumber(stock.volume_ratio)}x
-                    </div>
-                </div>
-
-                <div class="item">
-                    <div class="label">Unusual Volume</div>
-                    <div class="value">
-                        ${stock.unusual_volume ? "🔥 YES" : "No"}
-                    </div>
-                </div>
-
-            </div>
-
-
-            <div class="entry">
-
-                <div class="entry-row">
-                    <span>Entry</span>
-                    <strong>
-                        ₹${formatNumber(stock.entry)}
-                    </strong>
-                </div>
-
-                <div class="entry-row">
-                    <span>Stop Loss</span>
-                    <strong>
-                        ${stock.sl !== null
-                            ? "₹" + formatNumber(stock.sl)
-                            : "-"
-                        }
-                    </strong>
-                </div>
-
-                <div class="entry-row">
-                    <span>Target</span>
-                    <strong>
-                        ${stock.target !== null
-                            ? "₹" + formatNumber(stock.target)
-                            : "-"
-                        }
-                    </strong>
-                </div>
-
-                <div class="entry-row">
-                    <span>Signal Time</span>
-                    <strong>
-                        ${stock.entry_time || "-"}
-                    </strong>
-                </div>
-
-            </div>
-
+function esc(v){
+    return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]));
+}
+function signalInfo(s){
+    s=String(s||"WAIT").toUpperCase();
+    if(s==="BUY") return ["buy","🟢 BUY — CONFIRMED"];
+    if(s==="SELL") return ["sell","🔴 SELL — CONFIRMED"];
+    if(s==="EARLY BUY") return ["earlybuy","🟡 EARLY BUY — SETUP BUILDING"];
+    if(s==="EARLY SELL") return ["earlysell","🟠 EARLY SELL — BREAKDOWN SETUP"];
+    return ["wait","⚪ WAIT"];
+}
+function card(x){
+    const s=String(x.signal||"WAIT").toUpperCase();
+    const [cls,label]=signalInfo(s);
+    const reason=x.signal_reason || "Waiting for stronger setup conditions.";
+    const level=s==="EARLY BUY"?x.breakout_level:s==="EARLY SELL"?x.breakdown_level:null;
+    return `<div class="card ${cls}">
+      <div class="top">
+        <div>
+          <div class="symbol">${esc(x.symbol||"-")}</div>
+          <div class="category">${esc(x.category||"")} ${x.fno?"• F&O":""}</div>
         </div>
-
-    `;
+        <div class="signal ${cls}">${label}</div>
+      </div>
+      <div class="price">${rupee(x.price)}</div>
+      <div class="grid">
+        <div class="item"><div class="label">SETUP SCORE</div><div class="value">${val(x.setup_score)}</div></div>
+        <div class="item"><div class="label">CONFIDENCE</div><div class="value">${val(x.confidence)}</div></div>
+        <div class="item"><div class="label">MOMENTUM</div><div class="value">${val(x.momentum,"%")}</div></div>
+        <div class="item"><div class="label">RSI</div><div class="value">${val(x.rsi)}</div></div>
+        <div class="item"><div class="label">VWAP</div><div class="value">${rupee(x.vwap)}</div></div>
+        <div class="item"><div class="label">VOLUME RATIO</div><div class="value">${val(x.volume_ratio,"x")}</div></div>
+        <div class="item"><div class="label">VOLUME BUILDING</div><div class="value">${val(x.volume_build_ratio,"x")}</div></div>
+        <div class="item"><div class="label">EMA20 SLOPE</div><div class="value">${val(x.ema20_slope_pct,"%")}</div></div>
+        <div class="item"><div class="label">BREAKOUT LEVEL</div><div class="value">${rupee(x.breakout_level)}</div></div>
+        <div class="item"><div class="label">BREAKDOWN LEVEL</div><div class="value">${rupee(x.breakdown_level)}</div></div>
+        <div class="item"><div class="label">UNUSUAL VOLUME</div><div class="value">${x.unusual_volume?"🔥 YES":"No"}</div></div>
+        <div class="item"><div class="label">SIGNAL TYPE</div><div class="value">${esc(x.signal_type||s)}</div></div>
+      </div>
+      <div class="setup">
+        <b>${level!==null && level!==undefined ? (s==="EARLY BUY"?"🎯 Watch Breakout":"🔻 Watch Breakdown") : "📌 Setup Status"}</b>
+        ${level!==null && level!==undefined ? " • "+rupee(level) : ""}
+        <div class="reason">${esc(reason)}</div>
+      </div>
+      <div class="entry">
+        <div class="entry-row"><span>Entry</span><strong>${rupee(x.entry)}</strong></div>
+        <div class="entry-row"><span>Stop Loss</span><strong>${rupee(x.sl)}</strong></div>
+        <div class="entry-row"><span>Target</span><strong>${rupee(x.target)}</strong></div>
+        <div class="entry-row"><span>Signal Time</span><strong>${esc(x.entry_time||"-")}</strong></div>
+      </div>
+    </div>`;
 }
-
-
-function renderStocks(stocks) {
-
-    const container =
-        document.getElementById("stocks");
-
-    if (!stocks || stocks.length === 0) {
-
-        container.innerHTML = `
-            <div class="empty">
-                😕 Is category mein abhi data nahi mila.
-            </div>
-        `;
-
-        return;
+function render(list){
+    const el=document.getElementById("stocks");
+    if(!Array.isArray(list)||list.length===0){
+        el.innerHTML='<div class="empty">😕 No stock data available.</div>'; return;
     }
-
-    container.innerHTML =
-        stocks.map(stockCard).join("");
+    el.innerHTML=list.map(card).join("");
 }
-
-
-async function fetchStocks(url, title) {
-
-    try {
-
-        setStatus(
-            "⏳ " + title + " scanning..."
-        );
-
-        const response =
-            await fetch(url);
-
-        const data =
-            await response.json();
-
-        if (!data.success) {
-
-            setStatus(
-                "❌ Scanner error"
-            );
-
-            return;
-        }
-
-        renderStocks(data.stocks || []);
-
-        setStatus(
-            "✅ " +
-            title +
-            " • " +
-            (data.stocks || []).length +
-            " stocks"
-        );
-
-    } catch (error) {
-
-        console.error(error);
-
-        setStatus(
-            "❌ Data load error"
-        );
-
-        document.getElementById("stocks").innerHTML = `
-            <div class="empty">
-                Server/data error. Please try again.
-            </div>
-        `;
+async function loadApi(url,title){
+    document.getElementById("status").textContent="⏳ "+title+" scanning...";
+    document.getElementById("stocks").innerHTML='<div class="empty">Loading data...</div>';
+    try{
+        const r=await fetch(url,{cache:"no-store"});
+        const text=await r.text();
+        let data;
+        try{data=JSON.parse(text)}catch(e){throw new Error("Server returned non-JSON: "+text.slice(0,120))}
+        if(!r.ok) throw new Error("HTTP "+r.status);
+        if(data.success===false) throw new Error(data.error||"API returned success=false");
+        render(data.stocks||[]);
+        document.getElementById("status").textContent="✅ "+title+" • "+(data.stocks||[]).length+" stocks";
+    }catch(e){
+        console.error(e);
+        document.getElementById("status").textContent="❌ "+e.message;
+        document.getElementById("stocks").innerHTML='<div class="empty">Data load error.<br><br>API response/connection check required.</div>';
     }
 }
-
-
-function loadCategory(category) {
-
-    if (category === "large") {
-
-        fetchStocks(
-            "/api/large-cap",
-            "Large Cap"
-        );
-
-    }
-
-    else if (category === "mid") {
-
-        fetchStocks(
-            "/api/mid-cap",
-            "Mid Cap"
-        );
-
-    }
-
-    else if (category === "small") {
-
-        fetchStocks(
-            "/api/small-cap",
-            "Small Cap"
-        );
-
-    }
-
-    else if (category === "fno") {
-
-        fetchStocks(
-            "/api/fno-stocks",
-            "F&O"
-        );
-
-    }
-
-    else if (category === "unusual") {
-
-        fetchStocks(
-            "/api/unusual-volume",
-            "Unusual Volume"
-        );
-
-    }
+function markTab(name){
+    document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));
+    const b=document.getElementById("tab-"+name); if(b)b.classList.add("active");
 }
-
-
-function scanAll() {
-
-    fetchStocks(
-        "/api/scan",
-        "All Stocks"
-    );
-
-}
-
-
-window.onload = function() {
-
-    loadCategory("large");
-
-};
-
+window.onload=()=>{markTab("large");loadApi("/api/large-cap","Large Cap")};
 </script>
-
 </body>
 </html>
